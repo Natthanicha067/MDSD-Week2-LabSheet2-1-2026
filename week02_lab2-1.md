@@ -648,7 +648,99 @@ void main() {
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
 // บันทึกโค้ดในส่วนนี้
+void main() {
+  List<Map<String, dynamic>> students = [
+    {"name": "สมชาย",  "gpa": 3.75, "year": 3, "faculty": "วิศวกรรม"},
+    {"name": "สมหญิง", "gpa": 2.50, "year": 1, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศักดิ์","gpa": 3.10, "year": 2, "faculty": "วิศวกรรม"},
+    {"name": "สมใจ",  "gpa": 1.80, "year": 4, "faculty": "บริหาร"},
+    {"name": "สมปอง", "gpa": 3.50, "year": 2, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศรี", "gpa": 2.90, "year": 3, "faculty": "บริหาร"},
+  ];
 
+
+  // Function หานักศึกษาที่ GPA สูงสุดในคณะที่กำหนด
+  String? findTopStudentByFaculty(
+      List<Map<String, dynamic>> students, String faculty) {
+
+    var facultyStudents = students
+        .where((s) => s["faculty"] == faculty)
+        .toList();
+
+    if (facultyStudents.isEmpty) {
+      return null;
+    }
+
+    var topStudent = facultyStudents.reduce(
+      (a, b) => a["gpa"] > b["gpa"] ? a : b,
+    );
+
+    return topStudent["name"];
+  }
+
+
+  // Function จัดกลุ่มนักศึกษาตามคณะ
+  Map<String, List<Map<String, dynamic>>> groupByFaculty(
+      List<Map<String, dynamic>> students) {
+
+    Map<String, List<Map<String, dynamic>>> groups = {};
+
+    for (var student in students) {
+      String faculty = student["faculty"];
+
+      if (!groups.containsKey(faculty)) {
+        groups[faculty] = [];
+      }
+
+      groups[faculty]!.add(student);
+    }
+
+    return groups;
+  }
+
+
+  // === เรียกใช้ Function หา Top Student ===
+  print("=== นักศึกษาที่ GPA สูงสุดแต่ละคณะ ===");
+
+  print(
+      "วิศวกรรม: ${findTopStudentByFaculty(students, "วิศวกรรม")}");
+  print(
+      "วิทยาศาสตร์: ${findTopStudentByFaculty(students, "วิทยาศาสตร์")}");
+  print(
+      "บริหาร: ${findTopStudentByFaculty(students, "บริหาร")}");
+
+
+  // === Group นักศึกษาตามคณะ ===
+  print("\n=== จัดกลุ่มนักศึกษาตามคณะ ===");
+
+  var facultyGroups = groupByFaculty(students);
+
+  facultyGroups.forEach((faculty, list) {
+    print("$faculty:");
+
+    for (var s in list) {
+      print("  ${s["name"]} GPA: ${s["gpa"]}");
+    }
+  });
+
+
+  // === Sort GPA จากมากไปน้อย ===
+  print("\n=== GPA สูงสุด 3 อันดับแรก ===");
+
+  students.sort(
+    (a, b) => (b["gpa"] as double)
+        .compareTo(a["gpa"] as double),
+  );
+
+
+  for (int i = 0; i < 3; i++) {
+    print(
+      "${i + 1}. ${students[i]["name"]} "
+      "GPA: ${students[i]["gpa"]} "
+      "คณะ: ${students[i]["faculty"]}"
+    );
+  }
+}
 
 ```
 ---
