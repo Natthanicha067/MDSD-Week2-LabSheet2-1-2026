@@ -1087,7 +1087,265 @@ void main() {
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
 // บันทึกโค้ดในส่วนนี้
+void main() {
 
+  // ===== CheckingAccount =====
+  print("=== Checking Account ===");
+
+  var checking = CheckingAccount(
+    ownerName: "สมปอง",
+    initial: 1000,
+  );
+
+  checking.withdraw(1300); // ใช้ Overdraft
+  checking.printStatement();
+
+
+  // ===== Vehicle =====
+  print("\n=== Vehicle ===");
+
+  var car = Car();
+  car.refuel(50);
+  car.drive(200);
+
+  var truck = Truck();
+  truck.refuel(100);
+  truck.drive(300);
+
+
+  // ===== Product + Mixin =====
+  print("\n=== Product Discount ===");
+
+  var product = Product(
+    name: "Laptop",
+    price: 30000,
+  );
+
+  print("สินค้า: ${product.name}");
+  print("ราคาเดิม: ${product.price}");
+
+  product.applyDiscount(10);
+
+  print("ราคาหลังลด: ${product.price}");
+}
+
+
+// =============================
+// CheckingAccount
+// =============================
+
+class CheckingAccount extends BankAccount {
+
+  CheckingAccount({
+    required String ownerName,
+    double initial = 0,
+  }) : super(ownerName: ownerName, initial: initial);
+
+
+  @override
+  bool withdraw(double amount) {
+
+    double overdraftLimit = 500;
+
+    if (amount <= 0) {
+      print("❌ จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+
+
+    // ถอนเกินยอดได้ไม่เกิน 500
+    if (amount > balance + overdraftLimit) {
+      print("❌ เกินวงเงิน Overdraft");
+      return false;
+    }
+
+
+    if (amount > balance) {
+
+      double fee = 50;
+
+      _balance -= amount;
+      _balance -= fee;
+
+      _history.add(
+        "- ถอน Overdraft ${amount.toStringAsFixed(2)} บาท "
+        "ค่าธรรมเนียม 50 บาท "
+        "(ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})"
+      );
+
+      print("⚠️ ใช้ Overdraft ถอนสำเร็จ");
+      return true;
+    }
+
+
+    return super.withdraw(amount);
+  }
+}
+
+
+// =============================
+// แก้ไข BankAccount ให้ลูกเข้าถึงได้
+// =============================
+
+class BankAccount {
+
+  final String ownerName;
+  double _balance;
+  List<String> _history = [];
+
+
+  BankAccount({
+    required this.ownerName,
+    double initial = 0,
+  }) : _balance = initial;
+
+
+  double get balance => _balance;
+
+
+  bool deposit(double amount) {
+
+    if (amount <= 0) return false;
+
+    _balance += amount;
+    return true;
+  }
+
+
+  bool withdraw(double amount) {
+
+    if (amount > _balance) {
+      print("❌ เงินไม่พอ");
+      return false;
+    }
+
+    _balance -= amount;
+    return true;
+  }
+
+
+  void printStatement() {
+
+    print("เจ้าของบัญชี: $ownerName");
+    print("ยอดเงิน: $_balance");
+
+    for(var h in _history){
+      print(h);
+    }
+  }
+}
+
+
+
+// =============================
+// Abstract Vehicle
+// =============================
+
+abstract class Vehicle {
+
+  double fuel = 0;
+
+
+  // กม./ลิตร
+  double get fuelEfficiency;
+
+
+  void refuel(double liters) {
+
+    fuel += liters;
+
+    print(
+      "เติมน้ำมัน ${liters} ลิตร "
+      "น้ำมันคงเหลือ ${fuel} ลิตร"
+    );
+  }
+
+
+  void drive(double km) {
+
+    double usedFuel = km / fuelEfficiency;
+
+    if(usedFuel > fuel){
+
+      print("❌ น้ำมันไม่พอ");
+      return;
+    }
+
+
+    fuel -= usedFuel;
+
+    print(
+      "ขับ ${km} กม. "
+      "ใช้น้ำมัน ${usedFuel.toStringAsFixed(2)} ลิตร "
+      "เหลือ ${fuel.toStringAsFixed(2)} ลิตร"
+    );
+  }
+}
+
+
+
+// รถยนต์
+class Car extends Vehicle {
+
+  @override
+  double get fuelEfficiency => 15;
+}
+
+
+
+// รถบรรทุก
+class Truck extends Vehicle {
+
+  @override
+  double get fuelEfficiency => 8;
+}
+
+
+
+// =============================
+// Mixin Discountable
+// =============================
+
+mixin Discountable {
+
+
+  double applyDiscount(double percent) {
+
+    double discount = price * percent / 100;
+
+    price -= discount;
+
+    return price;
+  }
+
+
+  double get price;
+  set price(double value);
+
+}
+
+
+
+// Product ใช้ Mixin
+
+class Product with Discountable {
+
+  String name;
+  double price;
+
+
+  Product({
+    required this.name,
+    required this.price,
+  });
+
+
+  @override
+  String toString(){
+
+    return "$name ราคา $price บาท";
+  }
+}
 
 ```
 ---
