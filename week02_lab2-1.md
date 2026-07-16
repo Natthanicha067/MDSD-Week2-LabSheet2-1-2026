@@ -1646,7 +1646,121 @@ void main() async {
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
 // บันทึกโค้ดในส่วนนี้
+import 'dart:async';
 
+
+// ===============================
+// Future คำนวณภาษี
+// ===============================
+
+Future<double> calculateTax(double income) async {
+
+  await Future.delayed(Duration(milliseconds: 500));
+
+
+  double taxRate;
+
+  if (income <= 150000) {
+    taxRate = 0.0;
+  } 
+  else if (income <= 300000) {
+    taxRate = 0.05;
+  } 
+  else if (income <= 500000) {
+    taxRate = 0.10;
+  } 
+  else {
+    taxRate = 0.20;
+  }
+
+
+  return income * taxRate;
+}
+
+
+
+// ===============================
+// Stream จำลอง Chat Message
+// ===============================
+
+Stream<String> chatMessages() async* {
+
+  List<String> messages = [
+    "สวัสดีครับ",
+    "วันนี้เป็นอย่างไรบ้าง",
+    "กำลังเรียน Dart อยู่",
+    "Stream ทำงานแบบ Real-time",
+    "จบการสนทนา"
+  ];
+
+
+  for (int i = 0; i < messages.length; i++) {
+
+    await Future.delayed(Duration(seconds: 1));
+
+    yield messages[i];
+  }
+}
+
+
+
+// ===============================
+// Main
+// ===============================
+
+void main() async {
+
+
+  print("=== ระบบคำนวณภาษี ===");
+
+
+  // ดึงข้อมูลรายได้พร้อมกันด้วย Future.wait
+
+  List<double> incomes = await Future.wait([
+    Future.value(200000),
+    Future.value(450000),
+    Future.value(700000),
+  ]);
+
+
+  double totalTax = 0;
+
+
+  for (double income in incomes) {
+
+    double tax = await calculateTax(income);
+
+    totalTax += tax;
+
+    print(
+      "รายได้: ${income.toStringAsFixed(0)} บาท "
+      "ภาษี: ${tax.toStringAsFixed(2)} บาท"
+    );
+  }
+
+
+  print(
+    "ภาษีรวมทั้งหมด: ${totalTax.toStringAsFixed(2)} บาท"
+  );
+
+
+
+  // ===============================
+  // ทดสอบ Stream Chat
+  // ===============================
+
+  print("\n=== Chat Message ===");
+
+
+  await for (String message in chatMessages()) {
+
+    print("Message: $message");
+
+  }
+
+
+  print("\nสิ้นสุดการรับข้อความ");
+}
 
 ```
 ---
